@@ -1,0 +1,129 @@
+<link rel="import" href="../../vendor/polymer-ui-elements/polymer-ui-collapsible/polymer-ui-collapsible.html">
+<link rel="import" href="../../vendor/polymer-ui-elements/polymer-ui-icon-button/polymer-ui-icon-button.html">
+<link rel="import" href="../../vendor/polymer-ui-elements/polymer-ui-icon/polymer-ui-icon.html">
+<link rel="import" href="../../vendor/polymer-elements/polymer-selector/polymer-selector.html">
+
+<polymer-element name="polymer-ui-collapsible2" extends="polymer-ui-collapsible">
+	<script>
+    Polymer('polymer-ui-collapsible2', {
+		activeChanged:function()
+		{
+			//console.log("active", this.active);
+			this.fire('activated', this.active);
+		}
+    });
+  </script>
+</polymer-element>
+
+<!--Single list of files
+ - click on item : if folder, load data (asynch) then display
+ - click on open item : collapse
+
+
+<polymer-selector selected="0">
+  <div>Item 1</div>
+  <div>Item 2</div>
+  <div>Item 3</div>
+</polymer-selector>
+-->
+<polymer-element name="file-list" attributes="elements">
+	<template repeat="{{items}}" id="t" >
+
+	</template>
+	<script>
+    Polymer('file-list', {
+		
+		activeChanged:function()
+		{
+			//console.log("active", this.active);
+			this.fire('activated', this.active);
+		}
+    });
+  </script>
+</polymer-element>
+
+<polymer-element name="file-folder" attributes="name type subElements">
+	<style>
+		@host {
+	  		* {display: block;}
+	  	}
+	</style>
+	<template>
+		<span>
+			<template if="{{ type == 'folder' && subElements.length>0}}">
+				<polymer-ui-icon-button icon="plus" ></polymer-ui-icon-button>
+			</template>
+			<template if="{{ type == 'folder' && subElements.length==0}}">
+				<polymer-ui-icon-button icon="twitter" ></polymer-ui-icon-button>
+			</template>
+			<template if="{{ type == 'file' }}">
+				<polymer-ui-icon-button icon="menu" enabled=false ></polymer-ui-icon-button>
+			</template>
+			{{name}}
+		</span>
+	</template>
+	<script>
+    Polymer('file-folder', {
+		type:'file',
+		name:'file.txt',
+		subElements: [],
+		ready: function() {
+			console.log("subElements",this.subElements);
+		}
+    });
+  </script>
+</polymer-element>
+
+
+<polymer-element name="file-browser">
+	<style>
+		@host {
+	  * {
+		display: block;
+		
+	  }
+	
+	}
+	ul {list-style: none;}
+	li {list-style: none;}
+	.item.polymer-selected
+	{
+		background: #eee;
+	}
+	</style>
+	<template>
+		<div id="container" style="width:400px;">
+			<polymer-selector>
+			<template repeat="{{items}}" id="t" >
+				<li class="item">
+					<polymer-ui-collapsible2 on-activated="bleh">
+  						<div class="polymer-ui-collapsible-header" ><file-folder type="{{type}}" name="{{name}}" subElements="{{children}}"> </file-folder></div>
+  						<div>
+							<ul id="childElems" >
+					  			<template ref="t" repeat="{{ children }}" ></template>
+							</ul>
+  						</div>
+					</polymer-ui-collapsible2>
+			    </li>
+			</template>
+			</polymer-selector>
+		</div>
+    </template>
+
+  <script>
+	
+    Polymer('file-browser', {
+		items:[{name:"bla"}],
+		ready: function() {
+			//this.$.t.
+		},
+		bleh:function(src,state)
+		{
+			//console.log("children", this);
+			console.log("bleh",state, src);
+		}
+		
+    });
+  </script>
+</polymer-element>
+

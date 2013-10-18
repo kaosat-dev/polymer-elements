@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="vendor/polymer/polymer.min.js"></script>
+    <!--<link rel="stylesheet" type="text/css" href="index.css">
+    <link rel="stylesheet" href="font/font-awesome.css">-->
+    
+    <!-- Load custom element -->
+    <link rel="import" href="elements/servo-control/servo-control.html">
+	<link rel="import" href="elements/file-browser/file-browser.html">
+
+    
+  </head>
+  <body>
+
+	<!-------------Servo controls ------------------->
+	<!--
+	<servo-control name="leftFin" value=20.2 min=-60 max=60 style="position:absolute;top:50px" ></servo-control>
+	<servo-control name="rightFin" value=0 min=-90 max=90 style="position:absolute;top:150px"></servo-control>
+
+	<servo-control-websockets socketUrl="blabla" name="pouet" style="position:absolute;top:250px"></servo-control-websockets>-->
+
+	<!-------------File browser------------------->
+	<file-browser style="width:400px"> </file-browser>
+
+	<!--<file-folder type='folder' name='myFolder'> </file-folder>
+	<br>
+	<file-folder type='file'> </file-folder>-->
+
+    <script>
+    document.body.style.opacity = 0;
+    window.addEventListener('WebComponentsReady', function() {
+	    document.body.style.opacity = 1; // show body now that registration is done.
+		var fileBrowser =  document.querySelector('file-browser');
+		console.log("fileBrowser",fileBrowser);
+		//fileBrowser.items=[{'name': "toto"},{'name': "tatat"},{'name': "pouet"}]
+
+		fileBrowser.items=[
+		  {
+			'name': 'folder1',
+			'type':'folder',
+			'children':[{'name':'someThing.fa'},{name:'bli.fastq'}]
+		  },
+		  {
+		    'name': 'folder2',
+			'type':'folder',
+		    'children': [
+			  {
+		        'name': 'file.txt',
+		      },
+		      {
+		        'name': 'subFolder',
+				'type':'folder'
+		      },
+		      {
+		        'name': 'subFolder2',
+				'type':'folder',
+		        'children': [
+		          {
+		            'name': 'subsubFolder',
+					'type':'folder'
+					
+		          },
+		          {
+		            'name': 'subsubFolder2',
+					'type':'folder'
+		          }
+		        ]
+		      },
+		      {
+		        'name': 'subFolder3',
+				'type':'folder',
+		        'children': [
+		          {'name': 'subsubFolder3',
+				  'type':'folder'}
+		        ]
+		      }
+		    ]
+		  }]
+
+    });
+  </script>
+  </body>
+</html>
