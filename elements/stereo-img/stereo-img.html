@@ -6,8 +6,8 @@
 		}
 	</style>
 	<template>
-    	<img id="leftImg"  width="{{width/2}}" height="{{height/2}}" on-load="onImgLoaded" on-error="onImgLoadError" alt="Image not found"></img>
-    	<img id="rightImg" width="{{width/2}}" height="{{height/2}}" on-Error="onImgLoadError" alt="Image not found"></img>
+    	<img id="leftImg"  width="{{width/2}}" height="{{height/2}}" on-error="onImgLoadError" alt="Image not found"></img>
+    	<img id="rightImg" width="{{width/2}}" height="{{height/2}}" on-error="onImgLoadError" alt="Image not found"></img>
   	</template>
   	<script>
     	Polymer('stereo-img', {
@@ -17,6 +17,7 @@
 			height:480,
 			ready:function()
 			{
+				//FIXME: no onerror,onload event is raised , have to do it manually?
 				//this.$.leftImg.onerror = this.onImgLoadError;
 				//this.$.leftImg.onload = this.onImgLoaded;
 				this.$.leftImg.src =this.srcLeft;
@@ -29,10 +30,6 @@
 				console.log("BLABLA error loading img",ev.impl);
 				//ev.impl.target.src = null;
 				return false;
-			},
-			onImgLoaded:function(){
-				//="imgError(this);"
-				console.log("CUCUCUCU img loading ok");
 			}
     	});
   	</script>
