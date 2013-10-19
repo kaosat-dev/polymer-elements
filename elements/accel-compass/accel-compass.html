@@ -77,7 +77,93 @@
   </polymer-element>
 
 
-<polymer-element name="accel-compass" attributes="supported enabled roll pitch yaw" >
+<polymer-element name="accel-compass" attributes="supported enabled rotation debugData" >
+	<script>
+		Polymer("accel-compass", {
+			supported: false,
+			enabled: true,
+			created:function()
+			{
+				this.rotation={x:0,y:0,z:0};//roll, pitch , yaw
+			},
+			ready:function(){
+				window.addEventListener('beforeunload', this.beforeUnload.bind(this));
+				/*if (window.DeviceMotionEvent) {
+					this.supported = true;
+			  		window.addEventListener('devicemotion', this.deviceMotionHandler.bind(this), false);
+				}*/
+				if (window.DeviceOrientationEvent) {
+					this.supported = true;
+	  				// Listen for the event and handle DeviceOrientationEvent object
+			  		window.addEventListener('deviceorientation', this.deviceOrientationHandler.bind(this), false);
+				}
+		  	},
+			deviceMotionHandler:function (eventData)
+			{
+				console.log("eventData",eventData);
+				//original from http://www.html5rocks.com/en/tutorials/device/orientation/
+				// Grab the acceleration from the results
+				this.acceleration = eventData.acceleration;
+				// Grab the acceleration including gravity from the results
+				this.accelerationGrav = eventData.accelerationIncludingGravity;
+				// Grab the rotation rate from the results
+				this.rotation = eventData.rotationRate;
+				/*var rotation = eventData.rotationRate;
+				this.roll =  rotation.x != null ?	rotation.x.toFixed(2) : 0 ;
+				this.pitch = rotation.y != null ?	rotation.y.toFixed(2) : 0 ;
+				this.yaw =   rotation.z != null ?	rotation.z.toFixed(2) : 0 ;*/
+
+				// // Grab the refresh interval from the results
+				//info = eventData.interval;
+			},
+		  	deviceOrientationHandler:function(eventData)
+		  	{
+				//console.log("orientation changed",this);
+				// gamma is the left-to-right tilt in degrees, where right is positive
+				var tiltLR = eventData.gamma;//roll
+				var roll = tiltLR != null ?  tiltLR.toFixed(2) : 0 ;
+				
+				// beta is the front-to-back tilt in degrees, where front is positive
+				var tiltFB = eventData.beta;//pitch
+				var pitch = tiltFB != null ?  tiltFB.toFixed(2) : 0 ;
+
+				// alpha is the compass direction the device is facing in degrees
+				var dir = eventData.alpha//yaw
+				var yaw = dir != null ?  dir.toFixed(2) : 0 ;
+
+				//FIXME: no rotationChanged event is raised this way ?
+				/*this.rotation.x = roll;
+				this.rotation.y = pitch;
+				this.rotation.z = yaw;*/
+				this.rotation = {x:roll,y:pitch,z:yaw};
+			},
+			beforeUnload: function() {
+				window.removeEventListener('deviceorientation', this.deviceOrientationHandler);
+				window.removeEventListener('devicemotion', 		this.deviceMotionHandler)
+				return false;
+      		}
+		  });
+	</script>
+</polymer-element>
+
+<!--mix: send websocket messages when orientation changes-->
+<link rel="import" href="../web-socket/socket-io.html">
+<polymer-element name="accel-compass-websocket" extends="accel-compass" attributes="socketUrl">
+	<template>
+		<socket-io id="_webSocket" socketUrl={{socketUrl}} message="{value:{{value}}, name:{{name}}}"></socket-io> 
+	</template>
+	<script>
+		Polymer("accel-compass-websocket", {
+		rotationChanged:function()
+		{
+			this.$._webSocket.send("message",{command:"rotation",value:this.rotation});
+		}
+		});
+	</script>
+</polymer-element>
+
+<!--helper more than anything-->
+<polymer-element name="accel-compass-visual" extends="accel-compass">
 	<style>
 		@host {
 	  * {
@@ -87,58 +173,13 @@
 	}
 	</style>
 	<template>
-		<input type="checkbox" checked="{{supported}}" disabled>Supported</input>
-		<input type="checkbox" checked="{{enabled}}" >enabled</input>
-		<input type="text" value={{roll}} disabled>Roll</input>
-		<input type="text" value={{pitch}} disabled>Pitch</input>
-		<input type="text" value={{yaw}} disabled>Yaw</input>
+		Supported<input type="checkbox" checked="{{supported}}" disabled></input>
+		enabled<input type="checkbox" checked="{{enabled}}" ></input>
+		Rotation<input type="text" value="{{'x:'+rotation.x +' y:'+ rotation.y+' z:'+ rotation.z}}" disabled></input>
+		Debug info<input type="text" value={{debugData}} disabled></input>
 	</template>
 	<script>
-		Polymer("accel-compass", {
-			supported: false,
-			enabled: true,
-			roll: 0,
-			pitch:0,
-			yaw:0,
-			ready:function(){
-				//var self = this;
-				if (window.DeviceOrientationEvent) {
-					this.supported = true;
-					window.addEventListener('beforeunload', this.beforeUnload.bind(this));
-	  				// Listen for the event and handle DeviceOrientationEvent object
-			  		window.addEventListener('deviceorientation', this.devOrientHandler.bind(this));
-				}
-				/*
-				if (window.DeviceMotionEvent) {
-					this.supported = true;
-	  				// Listen for the event and handle DeviceOrientationEvent object
-			  		window.addEventListener('deviceorientation', this.devOrientHandler, false);
-				}*/
-		  	},
-		  	devOrientHandler:function(eventData)
-		  	{
-				console.log("orientation changed",this);
-				// gamma is the left-to-right tilt in degrees, where right is positive
-				var tiltLR = eventData.gamma;//roll
-				this.roll = tiltLR != null ?  tiltLR.toFixed(2) : 0 ;
-				
-				// beta is the front-to-back tilt in degrees, where front is positive
-				var tiltFB = eventData.beta;//pitch
-				this.pitch = tiltFB != null ?  tiltFB.toFixed(2) : 0 ;
-
-				// alpha is the compass direction the device is facing in degrees
-				var dir = eventData.alpha//yaw
-				this.yaw = dir != null ?  dir.toFixed(2) : 0 ;
-
-				console.log("tiltLR",tiltLR,"tiltFB",tiltFB,"dir",dir);
-			},
-			beforeUnload: function() {
-				window.removeEventListener('deviceorientation', this.devOrientHandler)
-				//this.ws.
-        		//this.ws.onclose = function () {}; // disable onclose handler first
-        		//this.ws.close();
-				return true;
-      		}
-		  });
+		Polymer("accel-compass-visual", {
+		});
 	</script>
 </polymer-element>

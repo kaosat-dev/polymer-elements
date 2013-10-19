@@ -6,6 +6,8 @@
     <link rel="stylesheet" href="font/font-awesome.css">-->
     
     <!-- Load custom elements -->
+	<link rel="import" href="elements/web-socket/web-socket.html">
+
     <link rel="import" href="elements/servo-control/servo-control.html">
 	<link rel="import" href="elements/file-browser/file-browser.html">
 	<link rel="import" href="elements/accel-compass/accel-compass.html">
@@ -35,7 +37,13 @@
 
 	<!-------------Accelerometer/compass---------------->
 	<h2>Accelerometer/compass</h2>
+	<!--use this one for debuging-->
+	<accel-compass-visual> </accel-compass-visual>
+	<!--or this one for pure data/events-->
 	<accel-compass> </accel-compass>
+	<!--this one sends rotation data via websockets-->
+	<accel-compass-websocket socketUrl="http://192.168.1.5:8090" ></accel-compass-websocket>
+	
 
 	<!-------------Stereo view---------------->
 	<h2>Stereo image / stream view</h2>

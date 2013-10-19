@@ -1,0 +1,46 @@
+<script src="/socket.io/socket.io.js"></script>
+<polymer-element name="socket-io" attributes="socketUrl message">
+  <script>
+    Polymer("socket-io", {
+      	message:null,
+      	socketUrl:null,
+		ready:function(){
+			window.addEventListener('beforeunload', this.beforeUnload.bind(this));
+		},
+      	messageChanged: function()
+		{
+        	this.send(null, this.message);
+      	},
+      	socketUrlChanged: function() {
+        	console.log("socketUrl",this.socketUrl);
+			console.log("io",io);
+			this.ws = io.connect(this.socketUrl);
+			this.ws.on('error', this.onError.bind(this) );
+			this.ws.on('disconnect', this.onError.bind(this) );
+			this.ws.on('connect_failed', this.onError.bind(this) );
+      	},
+		receive: function(msg) {
+        	this.message = JSON.parse(msg.data);
+      	},
+      	send: function(prefix, data)
+		{
+			var prefix = prefix || "message";
+			console.log("sending message via socket-io",data);
+			try
+			{
+				this.ws.emit('message', data);
+			}catch(error)
+			{
+				console.log("cannot send message: error:"+error);
+			}
+      	},
+		onError:function (error) {
+            console.log('Error in socket.io',error);
+        },
+		beforeUnload: function() {
+        	//this.ws.onclose = function () {}; // disable onclose handler first
+        	//this.ws.close();
+      	}
+    });
+    </script>
+</polymer-element>
