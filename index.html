@@ -5,10 +5,11 @@
     <!--<link rel="stylesheet" type="text/css" href="index.css">
     <link rel="stylesheet" href="font/font-awesome.css">-->
     
-    <!-- Load custom element -->
+    <!-- Load custom elements -->
     <link rel="import" href="elements/servo-control/servo-control.html">
 	<link rel="import" href="elements/file-browser/file-browser.html">
-
+	<link rel="import" href="elements/accel-compass/accel-compass.html">
+	<link rel="import" href="elements/stereo-img/stereo-img.html">
     
   </head>
   <body>
@@ -24,13 +25,21 @@
 	<servo-control name="rightFin" value=0 min=-90 max=90 ></servo-control>
 	<servo-control-websockets socketUrl="blabla" name="pouet"></servo-control-websockets>
 
-	<!-------------File browser------------------->
+	<!-------------File browser------------------------->
 	<h2>File Browser</h2>
 	<file-browser style="width:400px"> </file-browser>
 
 	<!--<file-folder type='folder' name='myFolder'> </file-folder>
 	<br>
 	<file-folder type='file'> </file-folder>-->
+
+	<!-------------Accelerometer/compass---------------->
+	<h2>Accelerometer/compass</h2>
+	<accel-compass> </accel-compass>
+
+	<!-------------Stereo view---------------->
+	<h2>Stereo image / stream view</h2>
+	<stereo-img srcLeft="http://192.168.1.13:8080/?action=stream" srcRight="http://192.168.1.13:8090/?action=stream" width="640" height="480"></stereo-img>
 
     <script>
     document.body.style.opacity = 0;
