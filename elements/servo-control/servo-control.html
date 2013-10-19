@@ -1,30 +1,43 @@
-<polymer-element name="web-socket" attributes="socketUrl message">
+<polymer-element name="web-socket" attributes="socketUrl socketPort message">
   <script>
     Polymer("web-socket", {
-      message:null,
-      socketUrl:null,
-      messageChanged: function() {
-        console.log("message",this.message);
-        //this.send(this.message);
-      },
-      socketUrlChanged: function() {
-        console.log("socketUrl",this.socketUrl);
-        /*
-        if (window.WebSocket) {
-          this.ws = new WebSocket("ws://" + document.domain + ':8888/cpu/' + this.socketUrl);
-          this.ws.onmessage = this.receive.bind(this);
-        }*/
-      },
-      /*beforeUnload: function() {
-        this.ws.onclose = function () {}; // disable onclose handler first
-        this.ws.close();
-      },
-      receive: function(msg) {
-        this.message = JSON.parse(msg.data);
-      },
-      send: function(data) {
-        this.ws.send(data);
-      }*/
+      	message:null,
+      	socketUrl:null,
+		socketPort:8000,
+		ready:function(){
+			window.addEventListener('beforeunload', this.beforeUnload.bind(this));
+		},
+      	messageChanged: function() {
+        	console.log("message",this.message);
+        	this.send(this.message);
+      	},
+      	socketUrlChanged: function() {
+        	console.log("socketUrl",this.socketUrl);
+        	if (window.WebSocket) {
+         	 	this.ws = new WebSocket("ws://" + document.domain +':'+ this.socketPort+'/' + this.socketUrl);
+         	 	this.ws.onmessage = this.receive.bind(this);
+				this.ws.onerror = this.onError.bind(this);
+        	}
+      	},
+		receive: function(msg) {
+        	this.message = JSON.parse(msg.data);
+      	},
+      	send: function(data) {
+			try
+			{
+        		this.ws.send(data);
+			}catch(error)
+			{
+				console.log("cannot send message: error:"+error);
+			}
+      	},
+		onError:function (error) {
+            console.error('There was an un-identified Web Socket error',error);
+        },
+		beforeUnload: function() {
+        	//this.ws.onclose = function () {}; // disable onclose handler first
+        	//this.ws.close();
+      	}
     });
     </script>
   </polymer-element>
