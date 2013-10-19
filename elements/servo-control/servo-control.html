@@ -32,6 +32,13 @@
   <polymer-element name="servo-control" attributes="name value step min max">
     <template>
       <style>
+		@host {
+	  * {
+		display: block;
+		padding-bottom: 15px;
+		
+	  }
+	}
         input[type='range'].mainSlider::-webkit-slider-thumb{
             -webkit-appearance: none !important;
             background:blue;
@@ -61,9 +68,10 @@
      
       #valueOver{
         position:absolute;
-        top:-15px;
         text-align: center;
         width:170px;
+		line-height:0.5em;
+		font-size:0.8em;
       }
       </style>
       <div>
