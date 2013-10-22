@@ -9,7 +9,14 @@
 		activeChanged:function()
 		{
 			//console.log("active", this.active);
-			this.fire('activated', this.active);
+			if(this.active)
+			{
+				this.fire('activated', this.active);
+			}
+			else
+			{
+				this.fire('deactivated', this.active);
+			}
 		}
     });
   </script>
@@ -75,7 +82,35 @@
 </polymer-element>
 
 
-<polymer-element name="file-browser">
+<polymer-element name="adress-bar" attributes="path">
+	<style>
+	 	.pathComponent
+		{
+			color:blue;
+			cursor:pointer;
+		}
+	</style>
+	<template>
+		<template repeat="{{component in _pathComponents}}">
+			<span class="pathComponent" on-click="pathComponentClicked">{{component}}</span>/
+		</template>
+	</template>
+	<script>
+	Polymer('adress-bar', {
+		path:"/home/",
+		ready: function() {
+			this._pathComponents = this.path.split("/");
+			
+		},
+		created: function() {},
+		pathComponentClicked:function(event, detail, sender){
+			console.log("pouet", sender.impl.innerText);
+		}
+	});
+	</script>
+</polymer-element>
+
+<polymer-element name="file-browser" attributes="rootpath">
 	<style>
 		@host {
 	  * {
@@ -93,10 +128,11 @@
 	</style>
 	<template>
 		<div id="container" style="width:400px;">
+			<adress-bar></adress-bar>
 			<polymer-selector>
 			<template repeat="{{items}}" id="t" >
 				<li class="item">
-					<polymer-ui-collapsible2 on-activated="bleh">
+					<polymer-ui-collapsible2 on-activated="bleh" on-deactivated="blah">
   						<div class="polymer-ui-collapsible-header" ><file-folder type="{{type}}" name="{{name}}" subElements="{{children}}"> </file-folder></div>
   						<div>
 							<ul id="childElems" >
@@ -113,14 +149,43 @@
   <script>
 	
     Polymer('file-browser', {
-		items:[{name:"bla"}],
-		ready: function() {
-			//this.$.t.
-		},
+		rootpath:"toto",
+		items:[{name:"rootFolder"}],
+		ready: function() {console.log("file browser ready"); },
+		created: function() {console.log("file browser created"); },
+  		enteredView: function () { console.log("file browser entered view");},
+  		leftView: function() { console.log("file browser left view"); },
 		bleh:function(src,state)
 		{
 			//console.log("children", this);
-			console.log("bleh",state, src);
+			console.log("activated",state, src);
+			this.fetchData(); 
+		},
+		blah:function(src,state)
+		{
+			//console.log("children", this);
+			console.log("DE-activated",state, src);
+		},
+		fetchData:function(path)
+		{
+			this.async(function() {
+				items= [{
+				'name': 'folder1',
+				'type':'folder',
+				'children':[{'name':'someThing.fa'},{name:'bli.fastq'}]
+			  	}];
+				
+		
+
+				if(this.items[0].children != items)
+				{
+					this.items[0].children = items;
+				}
+				console.log("blah");
+				console.log("this",this);
+			}, null, 1000);
+
+
 		}
 		
     });
