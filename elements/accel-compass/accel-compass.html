@@ -77,17 +77,21 @@
   </polymer-element>
 
 
-<polymer-element name="accel-compass" attributes="supported enabled rotation debugData" >
+<polymer-element name="accel-compass" attributes="supported enabled rotation samples debugData" >
 	<script>
 		Polymer("accel-compass", {
 			supported: false,
 			enabled: true,
+			samples: 1, //how many samples to take/average before sending event
 			created:function()
 			{
-				this.rotation={x:0,y:0,z:0};//roll, pitch , yaw
+				this.rotation = {x:0,y:0,z:0};//roll, pitch , yaw
+				this._samplingIndex = 1;
+				this._rotationBuffer = {x:0,y:0,z:0};
 			},
 			ready:function(){
-				window.addEventListener('beforeunload', this.beforeUnload.bind(this));
+				//window.addEventListener('beforeunload', this.beforeUnload.bind(this));//buggy in chrome
+				window.onbeforeunload = this.beforeUnload.bind(this);
 				/*if (window.DeviceMotionEvent) {
 					this.supported = true;
 			  		window.addEventListener('devicemotion', this.deviceMotionHandler.bind(this), false);
@@ -135,13 +139,39 @@
 				/*this.rotation.x = roll;
 				this.rotation.y = pitch;
 				this.rotation.z = yaw;*/
-				this.rotation = {x:roll,y:pitch,z:yaw};
+				/*if (smoothOver <= 1)
+				{
+					this.rotation = {x:roll,y:pitch,z:yaw};
+				}*/
+
+				
+				var rotation = {x:parseFloat(roll),y:parseFloat(pitch),z:parseFloat(yaw)};
+				
+				if (this._samplingIndex > this.samples)
+				{
+					var index = this._samplingIndex - 1;
+					//console.log("Finished bufferring values","index",index,this._rotationBuffer);
+				
+					this.rotation = {x:this._rotationBuffer.x/index,y:this._rotationBuffer.y/index,z:this._rotationBuffer.z/index};
+					
+					this._samplingIndex=1;
+					this._rotationBuffer = {x:0,y:0,z:0};
+				}
+				else
+				{
+					//console.log("buffering values", "index",this._samplingIndex);
+					this._samplingIndex++;
+					this._rotationBuffer.x += rotation.x;
+					this._rotationBuffer.y += rotation.y;
+					this._rotationBuffer.z += rotation.z;
+				}
+				
 			},
-			beforeUnload: function() {
+			beforeUnload: function(event) {
 				window.removeEventListener('deviceorientation', this.deviceOrientationHandler);
-				window.removeEventListener('devicemotion', 		this.deviceMotionHandler)
-				return false;
-      		}
+				window.removeEventListener('devicemotion', 		this.deviceMotionHandler);
+
+      			}
 		  });
 	</script>
 </polymer-element>
@@ -154,10 +184,11 @@
 	</template>
 	<script>
 		Polymer("accel-compass-websocket", {
-		rotationChanged:function()
-		{
-			this.$._webSocket.send("message",{command:"rotation",value:this.rotation});
-		}
+			rotationChanged:function()
+			{
+				//this.$._webSocket.send("message",{command:"rotation",value:this.rotation});
+				this.$._webSocket.send("rotation",this.rotation);
+			}
 		});
 	</script>
 </polymer-element>
