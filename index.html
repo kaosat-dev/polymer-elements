@@ -9,7 +9,7 @@
 	<link rel="import" href="elements/web-socket/web-socket.html">
 
     <link rel="import" href="elements/servo-control/servo-control.html">
-	<link rel="import" href="elements/file-browser/file-browser.html">
+	<link rel="import" href="elements/file-browser/file-browser2.html">
 	<link rel="import" href="elements/accel-compass/accel-compass.html">
 	<link rel="import" href="elements/stereo-img/stereo-img.html">
     
@@ -24,7 +24,8 @@
 
 	<!-------------File browser------------------------->
 	<h2>File Browser</h2>
-	<file-browser style="width:400px"> </file-browser>
+	<!--<file-browser style="width:400px"> </file-browser>-->
+  <file-browser2 style="width:200px"> </file-browser2>
 
 	<!--<file-folder type='folder' name='myFolder'> </file-folder>
 	<br>
@@ -48,8 +49,20 @@
     document.body.style.opacity = 0;
     window.addEventListener('WebComponentsReady', function() {
 	    document.body.style.opacity = 1; // show body now that registration is done.
-		var fileBrowser =  document.querySelector('file-browser');
+		var fileBrowser =  document.querySelector('file-browser2');
 		console.log("fileBrowser",fileBrowser);
+
+    fileBrowser.addEventListener('file-selected', function(e) {
+      var fileName = e.impl.detail;
+      console.log("file selected",fileName); 
+    });
+
+    fileBrowser.addEventListener('folder-selected', function(e) {
+      var folderName = e.impl.detail;
+      console.log("folder selected",folderName); 
+    });
+    
+    
 		//fileBrowser.items=[{'name': "toto"},{'name': "tatat"},{'name': "pouet"}]
 		/*
 		fileBrowser.items=[

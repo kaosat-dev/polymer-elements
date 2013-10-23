@@ -1,0 +1,224 @@
+<link rel="import" href="../../vendor/polymer-ui-elements/polymer-ui-collapsible/polymer-ui-collapsible.html">
+<link rel="import" href="../../vendor/polymer-ui-elements/polymer-ui-icon-button/polymer-ui-icon-button.html">
+<link rel="import" href="../../vendor/polymer-ui-elements/polymer-ui-icon/polymer-ui-icon.html">
+<link rel="import" href="../../vendor/polymer-elements/polymer-selector/polymer-selector.html">
+
+<polymer-element name="folder-items" attributes="name type">
+	<style>
+		@host {
+	  		* {
+            display: block;
+        }
+        
+	  	}
+    	.item
+		    {
+			    cursor:pointer;
+          padding:20px;  
+          margin:20px;
+		    }
+	</style>
+	<template>
+		<span class="item" on-click="onItemClicked">
+      <table>
+        <tr><th>
+			    <template if="{{ type == 'folder'}}">
+				    <!--<polymer-ui-icon size=64 src="./icons/folder.png"></polymer-ui-icon-button>-->
+            <img src="./icons/folder.png" width="64" height="64" style="background-color: transparent;border: none;" />
+			    </template>
+			    <template if="{{ type == 'file' }}">
+            <img src="elements/file-browser/icons/{{ext}}.png" width="64" height="64" style="background-color: transparent;border: none;" />
+				    <!--<polymer-ui-icon enabled=false size=64 src="elements/file-browser/icons/{{ext}}.png"></polymer-ui-icon-button>-->
+			    </template>
+        </tr></th>
+        <tr><th>
+			    {{name}}
+        </tr></th>
+      </table>
+		</span>
+	</template>
+	<script>
+    Polymer('folder-items', {
+		type:'file',
+		name:'',
+    ext:'blank',
+    enteredView:function()
+    {
+      if(this.type != 'folder')
+      {
+        var ext=this.name.split('.').pop();
+         if(ext =="js" || ext=="coffee" || ext=="txt")
+        {
+          ext = "text";
+        }
+        else{ ext = "blank";}
+        this.ext = ext;
+        console.log("extension",this.ext);
+      }
+    },
+    onNameChanged:function()
+    {
+      if(this.type != 'folder')
+      {
+        var ext=this.name.split('.').pop();
+        if(ext =="js" || ext=="coffee" || ext=="txt")
+        {
+          ext = "text";
+        }
+        else{ ext = "blank";}
+        this.ext = ext;
+        console.log("extension",this.ext);
+      }
+    },
+    onItemClicked:function(event, detail, sender)
+    {
+      var model = sender.templateInstance_.model;
+      switch(model.type)
+      {
+        case "folder":
+          this.fire("folder-selected",model.name);
+          break;
+        default:
+          this.fire("file-selected", model.name);
+          break;
+      }
+    }
+    });
+  </script>
+</polymer-element>
+
+
+<polymer-element name="folder-content" attributes="items">
+  <template>
+    <div style="width:inherit">
+	    <template repeat="{{items}}" id="folderItems" >
+          <folder-items name="{{name}}" type="{{type}}" style="float:left"></folder-items>
+	    </template>
+    </div>
+  </template>
+	<script>
+    Polymer('folder-content', {
+    items:[]
+    });
+  </script>
+</polymer-element>
+
+<polymer-element name="adress-bar" attributes="path">
+	<style>
+	 	.pathComponent
+		{
+			color:blue;
+			cursor:pointer;
+		}
+	</style>
+	<template>
+		<template id="pathComponents" repeat="{{_pathComponents}}">
+			<span class="pathComponent" on-click="pathComponentClicked">{{name}}</span> / 
+		</template>
+	</template>
+	<script>
+	Polymer('adress-bar', {
+		path:"",
+		ready: function() {
+			this.generatePathComponents();
+		},
+    generatePathComponents:function(){
+      var pathComponents = this.path.split("/");
+      this._pathComponents = []
+      for (var i=0; i< pathComponents.length;i++)
+      {
+        var name = pathComponents[i];
+        var pathList = pathComponents.slice(0,i+1);
+        var path = pathList.join('/')
+        this._pathComponents.push({name:name, path:path, index:i});
+      }
+    },
+    pathChanged:function()
+    {
+        console.log("path changed",this.path);
+        this.generatePathComponents();
+    },
+		pathComponentClicked:function(event, detail, sender){
+      var model = sender.templateInstance_.model;
+      var targetPath = model.path;
+      console.log("please navigate to "+targetPath);
+      targetPathComponents = this._pathComponents.slice(0,model.index+1);
+      //TODO: don't replace path components just use a subset for display ??
+      this.async(function(){
+        //console.log("bla",this._pathComponents.length ,"blo", targetPathComponents.length);
+        if(this._pathComponents.length+1 != targetPathComponents.length)
+        {
+          this._pathComponents = targetPathComponents;
+          this.path = targetPath;
+          //this.fire('pathChanged', {msg: 'That hurt!'}); 
+        }
+      });      
+		}
+	});
+	</script>
+</polymer-element>
+
+
+<polymer-element name="file-browser2" attributes="path items">
+  <style>
+    @host {
+	  		* {display: inline-block;}
+	  	}
+      display: inline-block;
+  </style>
+	<template>
+    <div style="width:inherit; display:inline-block">
+      <adress-bar path={{path}} ></adress-bar>
+      <div id="contentBlock" style="height:300px; background-color:lightgray">
+        <folder-content on-folder-selected="folderSelected" items={{items}} style="width:inherit"></folder-content>
+      </div>
+    </div>
+	</template>
+	<script>
+    Polymer('file-browser2', {
+    path:"/home",
+    items:[],
+    created:function()
+    {
+      this.items = this.listDir(this.path);
+    },
+    listDir:function(path)
+    {
+      //for testing
+      result = []
+      switch(path)
+      {
+        case '/home':
+          result = [
+           {name: 'fooFolder',
+				   type:'folder',testMethod:function(){console.log("it works");} },
+           {name: 'barFolder',
+				   type:'folder'},
+           {name: 'bla.text'},
+           {name: 'aaa.coffee'}];
+          break;
+        case '/home/fooFolder':
+          result = [
+           {name: 'aFolder',
+				   type:'folder'},
+           {name: 'index.js'}];
+          break;
+      }
+      return result
+    },
+    pathChanged:function()
+    {
+      //emulate delayed response, just for testing
+      this.async(function() {
+			  this.items = this.listDir(this.path);
+			}, null, 200);
+      
+    },
+    folderSelected:function(event, folder)
+    { 
+      this.async(function(){this.path = this.path+"/"+folder;});
+    }
+    });
+  </script>
+</polymer-element>
+

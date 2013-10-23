@@ -33,21 +33,6 @@
   <div>Item 3</div>
 </polymer-selector>
 -->
-<polymer-element name="file-list" attributes="elements">
-	<template repeat="{{items}}" id="t" >
-
-	</template>
-	<script>
-    Polymer('file-list', {
-		
-		activeChanged:function()
-		{
-			//console.log("active", this.active);
-			this.fire('activated', this.active);
-		}
-    });
-  </script>
-</polymer-element>
 
 <polymer-element name="file-folder" attributes="name type subElements">
 	<style>
@@ -81,58 +66,6 @@
   </script>
 </polymer-element>
 
-
-<polymer-element name="adress-bar" attributes="path">
-	<style>
-	 	.pathComponent
-		{
-			color:blue;
-			cursor:pointer;
-		}
-	</style>
-	<template>
-		<template id="pathComponents" repeat="{{_pathComponents}}">
-			<span class="pathComponent" on-click="pathComponentClicked">{{name}}</span>/
-		</template>
-	</template>
-	<script>
-	Polymer('adress-bar', {
-		path:"/home/test/dev/bla/bli",
-		ready: function() {
-			this.generatePathComponents();
-		},
-		created: function() {},
-    generatePathComponents:function(){
-      var pathComponents = this.path.split("/");
-      this._pathComponents = []
-      for (var i=0; i< pathComponents.length;i++)
-      {
-        var name = pathComponents[i];
-        var pathList = pathComponents.slice(0,i+1);
-        var path = pathList.join('/')
-        this._pathComponents.push({name:name, path:path, index:i});
-      }
-    },
-		pathComponentClicked:function(event, detail, sender){
-      var model = sender.templateInstance_.model;
-      var targetPath = model.path;
-      console.log("please navigate to "+targetPath);
-      targetPathComponents = this._pathComponents.slice(0,model.index+1);
-      //TODO: don't replace path components just use a subset for display ??
-      this.async(function(){
-        //console.log("bla",this._pathComponents.length ,"blo", targetPathComponents.length);
-        if(this._pathComponents.length+1 != targetPathComponents.length)
-        {
-          this._pathComponents = targetPathComponents;
-          this.path = targetPath;
-          //this.fire('pathChanged', {msg: 'That hurt!'}); 
-        }
-      });      
-
-		}
-	});
-	</script>
-</polymer-element>
 
 <polymer-element name="file-browser" attributes="rootpath">
 	<style>
