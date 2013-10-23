@@ -135,13 +135,11 @@
     },
     pathChanged:function()
     {
-        console.log("path changed",this.path);
         this.generatePathComponents();
     },
 		pathComponentClicked:function(event, detail, sender){
       var model = sender.templateInstance_.model;
       var targetPath = model.path;
-      console.log("please navigate to "+targetPath);
       targetPathComponents = this._pathComponents.slice(0,model.index+1);
       //TODO: don't replace path components just use a subset for display ??
       this.async(function(){
